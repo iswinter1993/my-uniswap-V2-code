@@ -1,5 +1,5 @@
-const MyUniswapV2Factory = artifacts.require("MyUniswapV2Factory");
+const UniswapV2Factory = artifacts.require("UniswapV2Factory");
 
 module.exports = function (deployer) {
-  deployer.deploy(MyUniswapV2Factory);
+  deployer.deploy(UniswapV2Factory);
 };
