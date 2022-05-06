@@ -30,15 +30,19 @@ contract UniswapV2Factory is IUniswapV2Factory {
 
         require(getPair[token0][token1] == address(0), 'UniswapV2: PAIR_EXISTS'); // token0，token1的交易对必须是新的
 
-        bytes memory bytecode = type(UniswapV2Pair).creationCode;//bytecode赋值 UniswapV2Pair合约编译后的源代码
-        bytes32 salt = keccak256(abi.encodePacked(token0, token1));//将token0, token1打包后，通过keccak256编译成哈希值
-        //内联汇编
-        //
+        bytes memory bytecode = type(UniswapV2Pair).creationCode;// // 使用type(合约名称).creationCode 方法获得该合约编译之后的字节码
+        // abi.encodePacked()     编码打包
+        // keccak256              Solidity 内置加密Hash方法
+        // keccak256(abi.encodePacked(a, b))是计算keccak256(a, b)更明确的方式
+        bytes32 salt = keccak256(abi.encodePacked(token0, token1));
+        // 内联汇编
+        // mload(bytecode)          返回长度
+        // create2                  新的操作码 （opcode 操作码是程序的低级可读指令, 所有操作码都具有对应的十六进制值）
         assembly {
             //通过create2部署合约，并且传入参数，返回交易对地址pair
             pair := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
-        IUniswapV2Pair(pair).initialize(token0, token1);//调用initialize初始化pair
+        IUniswapV2Pair(pair).initialize(token0, token1);// 调用pair合约的初始化方法，传入参数tA tB
         getPair[token0][token1] = pair;
         getPair[token1][token0] = pair; //两个方向映射都设置
         allPairs.push(pair);
